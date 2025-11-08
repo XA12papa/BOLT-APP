@@ -6,14 +6,36 @@ import { prismaClient } from "db/client";
 import { ApiError, ApiResponse, asyncHandler } from "helper";
 import express, { text } from "express";
 import cors from "cors";
-import { ArtifactProcessor } from "./phraser";
+import { ArtifactProcessor, type phrase_response } from "./phraser";
 import { onShellCommand , onFileUpdate } from "./os";
+import WebSocket from "ws";
+
 const app = express();
 app.use(express.json());
 app.use(cors());
 
+const WS_URL =   "ws://localhost:8083";
+const ws_client = new WebSocket(WS_URL)
 
+<<<<<<< HEAD
 app.post('/prompt',asyncHandler( async (req,res)=>{
+=======
+
+ws_client.on('open',() =>{
+    ws_client.send("worker is connected to ws server ")
+})
+
+ws_client.on('message',(message)=>{
+    console.log(message.toString())
+})
+
+app.get("/server_health",(next)=>{
+    console.log("server working");
+    ws_client.send("server is connected ")
+    return;
+})
+app.post('/prompt',async (req,res)=>{
+>>>>>>> 163fec9 (added pipeline to stream the llm response at frontend)
     // 1 . Take projectId and prompt from user 
     // 2. fetch project from the prisma client
     // 3. pull all the history of chats from the prisma client
@@ -53,6 +75,11 @@ app.post('/prompt',asyncHandler( async (req,res)=>{
         }
     })
 
+
+
+    // connect to a ws server 
+
+
     let artifactProcessor = new ArtifactProcessor("",(filePath , fileContent ) => onFileUpdate(filePath,fileContent),(shellCommand)=>onShellCommand(shellCommand));
 
     let artifact = "";
@@ -85,8 +112,14 @@ app.post('/prompt',asyncHandler( async (req,res)=>{
             // chunk.delta contains all the response generation
             // console.log(chunk.delta)
             artifactProcessor.append(chunk.delta);
-            artifactProcessor.parse();
+            const PHRASE : phrase_response | null = await artifactProcessor.parse();
+            console.log("Phrase",PHRASE);
+            if(PHRASE !== null){
+                ws_client.send(JSON.stringify(PHRASE))
+            }
+
             artifact += chunk.delta;
+
         }
         
     }

@@ -1,0 +1,52 @@
+{
+  "users": [
+    {
+      "id": "me",
+      "name": "You",
+      "age": 0,
+      "bio": "This is you",
+      "image": ""
+    },
+    {
+      "id": "u1",
+      "name": "Ava",
+      "age": 26,
+      "bio": "Exploring the world. Coffee first, questions later.",
+      "image": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      "id": "u2",
+      "name": "Noah",
+      "age": 29,
+      "bio": "Coffee, code, and climbing.",
+      "image": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      "id": "u3",
+      "name": "Mia",
+      "age": 24,
+      "bio": "Dog lover and photographer.",
+      "image": "https://images.unsplash.com/photo-1531123414780-f46b2d2a2a1a?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      "id": "u4",
+      "name": "Liam",
+      "age": 31,
+      "bio": "Designer & traveler.",
+      "image": "https://images.unsplash.com/photo-1545996124-f6cc0bb1a8d1?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      "id": "u5",
+      "name": "Zoe",
+      "age": 28,
+      "bio": "Foodie. Let’s find the best tacos.",
+      "image": "https://images.unsplash.com/photo-1547425260-76bcadfb4f2c?auto=format&fit=crop&w=800&q=80"
+    }
+  ],
+  "likes": [
+    { "from": "u3", "to": "me" },
+    { "from": "u5", "to": "me" }
+  ],
+  "matches": []
+}
+  

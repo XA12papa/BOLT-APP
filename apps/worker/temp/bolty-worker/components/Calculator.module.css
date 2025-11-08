@@ -1,0 +1,73 @@
+    .container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .calculator {
+      width: 360px;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 10px 30px rgba(2, 6, 23, 0.08);
+    }
+
+    .display {
+      background: linear-gradient(180deg, #111827 0%, #1f2937 100%);
+      color: #fff;
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 2.25rem;
+      text-align: right;
+      margin-bottom: 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace;
+      min-height: 64px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .button {
+      background: #ffffff;
+      border: none;
+      padding: 14px;
+      font-size: 1.125rem;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(2, 6, 23, 0.05);
+      transition: transform 0.06s ease, box-shadow 0.06s ease;
+    }
+
+    .button:hover {
+      transform: translateY(-1px);
+    }
+
+    .operator {
+      background: #f59e0b;
+      color: white;
+    }
+
+    .equals {
+      background: #10b981;
+      color: white;
+    }
+
+    .zero {
+      grid-column: span 2;
+    }
+
+    .secondary {
+      background: #e6e9ef;
+    }
+
+    button:focus {
+      outline: 2px solid rgba(99, 102, 241, 0.3);
+      outline-offset: 2px;
+    }

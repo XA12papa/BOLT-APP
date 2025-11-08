@@ -26,10 +26,15 @@ function HomePage() {
       }
       const  response = await axios.post("http://localhost:8082/project",{prompt : textArea.value},{headers: {Authorization: `Bearer ${token}`}});
 
-      if(response.data){
-        console.log(response.data)
-        router.push(`/project/${response.data.id}`)    
+      if(!response.data.id){
+
+        // throw error response 
+        return;
       }
+
+
+      console.log(response.data);
+      router.push(`/project/${response.data.id}?init=TRUE`)
 
 
     } catch (error) {

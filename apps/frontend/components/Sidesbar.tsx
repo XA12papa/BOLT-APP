@@ -56,6 +56,7 @@ function Sidesbar() {
         async function getProjects(){
             try {
                 const response = await axios.get("http://localhost:8082/projects");
+                console.log(response);
                 setProjects(response.data);
             } catch (error) {
                 console.error(error);   
@@ -80,7 +81,7 @@ function Sidesbar() {
             <div className='projects'>
                 {
                     projects.map((project : projects,index : number) => (
-                        <div className='flex flex-row items-center justify-between   container  hover:bg-gray-300/10 hover:text-white  py-1   rounded-sm '>
+                        <div key={index} className='flex flex-row items-center justify-between   container  hover:bg-gray-300/10 hover:text-white  py-1   rounded-sm '>
                         <Button key={index} className='drawer-button   text-gray-400  bg-transparent hover:bg-transparent rounded-sm p-0 px-2 overflow-hidden' ><p className='w-full flex items-start justify-between overflow-hidden max-w-64'>{project.description}</p></Button>
                         
                         <Button className='bg-transparent hover:bg-transperent hover:text-red-500' onClick={handeleDeleteProject}><Trash2/>  </Button>

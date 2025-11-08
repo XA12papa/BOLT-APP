@@ -1,0 +1,128 @@
+    @import "tailwindcss";
+
+    :root {
+      --background: #ffffff;
+      --foreground: #171717;
+    }
+
+    @theme inline {
+      --color-background: var(--background);
+      --color-foreground: var(--foreground);
+      --font-sans: var(--font-geist-sans);
+      --font-mono: var(--font-geist-mono);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --background: #0a0a0a;
+        --foreground: #ededed;
+      }
+    }
+
+    body {
+      background: var(--background);
+      color: var(--foreground);
+      font-family: Arial, Helvetica, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      box-sizing: border-box;
+    }
+
+    .main {
+      max-width: 420px;
+      width: 100%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(250,250,250,1));
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      margin: 0 0 12px 0;
+      font-size: 20px;
+      text-align: center;
+    }
+
+    /* Calculator styles */
+    .calculator {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 12px;
+    }
+
+    .display {
+      background: #f7f7f7;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 28px;
+      text-align: right;
+      box-shadow: inset 0 -1px 0 rgba(0,0,0,0.02);
+      min-height: 48px;
+      overflow-x: auto;
+      word-break: break-all;
+    }
+
+    /* Buttons grid */
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .button {
+      background: #fff;
+      border: 1px solid #e6e6e6;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: transform 0.08s ease, background 0.08s ease;
+      user-select: none;
+    }
+
+    .button:active {
+      transform: translateY(1px);
+    }
+
+    .button.operator {
+      background: linear-gradient(180deg,#ffd27a,#ffb84d);
+      color: #000;
+      font-weight: 600;
+    }
+
+    .button.clear {
+      background: #ffe6e6;
+      border-color: #ffcfcf;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .main {
+        background: linear-gradient(180deg, rgba(10,10,10,0.95), rgba(20,20,20,1));
+        box-shadow: none;
+      }
+      .display {
+        background: #111;
+        color: #fff;
+      }
+      .button {
+        background: #0d0d0d;
+        border-color: #222;
+        color: #eaeaeb;
+      }
+      .button.operator {
+        background: linear-gradient(180deg,#444,#666);
+        color: #fff;
+      }
+      .button.clear {
+        background: #3b0000;
+        color: #fff;
+      }
+    }
