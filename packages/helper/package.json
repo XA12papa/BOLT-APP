@@ -8,9 +8,10 @@
     "typescript": "^5"
   },
   "exports": {
-    ".": "./helper.ts"
+    "./main": "./helper.ts"
   },
   "dependencies": {
+    "@types/express": "^5.0.5",
     "express": "^5.1.0"
   }
 }

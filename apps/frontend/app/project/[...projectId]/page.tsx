@@ -6,14 +6,12 @@ import {
     ResizablePanelGroup,
   } from "@/components/ui/resizable"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { Textarea } from "@/components/ui/textarea";
 import { BorderBeam } from "@/components/ui/border-beam";
 import { cn } from "@/lib/utils";
-import { usePathname } from "next/navigation";
 import { Eye, Code } from "lucide-react";
 import axios from "axios";
-import {use} from 'react'
 import { useAuth } from "@clerk/clerk-react";
 
 enum TabKey {
@@ -23,61 +21,27 @@ enum TabKey {
 
 
 export default function Chat(){
-<<<<<<< HEAD:apps/frontend/app/project/[projectId]/page.tsx
-    const {projectId} = useParams<{projectId : string}>();
+    const params = useParams<{projectId: string[]}>();
+    const projectId = params.projectId;
     const [prompt, setPrompt] = React.useState<string>("");
-    const [tabState, changetabState] = React.useState<TabKey>(TabKey.Code)
-=======
->>>>>>> 163fec9 (added pipeline to stream the llm response at frontend):apps/frontend/app/project/[...projectId]/page.tsx
-    // 1.send prompt to worker 
-    // 2.if preview is not ready set a loading screen
-    // 3.send the llm talk to the user 
-
-
-    const [tabState, changetabState] = React.useState<TabKey>(TabKey.Code)
-    const {projectId} = useParams();
+    const [tabState, changetabState] = React.useState<TabKey>(TabKey.Code);
     const {getToken} = useAuth();
 
 
 
     async function RequestToLLM()
     {
-<<<<<<< HEAD:apps/frontend/app/project/[projectId]/page.tsx
         try {
-            // 1. fetch the prompt history of the user 
-            // 2.extract the latest user prompt and feed it to llm
-            const response  =await axios.post('http://localhost:8082/getPrompts',{
-                projectId : projectId
-            });
+            // fetch history of chats
+            // if init == TRUE start a new conversation with the LLM 
+            let reloadCount = parseInt(sessionStorage.getItem('reloadCount') || '0', 10);
 
-            const latestPrompt = response.data[response.data.length - 1]?.prompt;
-            console.log(latestPrompt);
-
-            if(latestPrompt !== undefined && latestPrompt !== null && latestPrompt !== ""){
-                // request to llm ;
-
-                console.log(latestPrompt);
-                const llmResponse = await axios.post('http://localhost:3002/prompt',{
-                    prompt : latestPrompt,
-                    projectId : projectId
-                });
-
-                console.log(llmResponse.data)
-=======
-        // fetch history of chats
-        // if init == TRUE start a new conversation with the LLM 
-        let reloadCount = parseInt(sessionStorage.getItem('reloadCount') || '0', 10);
-
-        try {
-
-
-            if(projectId !== undefined){
+            if(projectId !== undefined && Array.isArray(projectId)){
                 console.log(projectId);
-                if(projectId[1] === 'TRUE' && reloadCount  ){
+                if(projectId[1] === 'TRUE' && reloadCount){
                     // 1.using project If fetch the prompts of use 
                     // 2. give llm some prompt 
                     // 3. fetch the response from llm and stream it the  usr
-
 
                     const token = await getToken()
                     const prompts = await axios.post("http://localhost:8082/getPrompts",{projectId : projectId[0]},{headers: {Authorization: `Bearer ${token}`}});
@@ -89,17 +53,29 @@ export default function Chat(){
 
                     const current_prompt = prompts?.data[0]?.prompt;
 
-                    
-
-
                     // send llm this prompt to process 
+                }
+            } else {
+                // 1.fetch the chat history from  the db and stream it to the user
+                // 1. fetch the prompt history of the user 
+                // 2.extract the latest user prompt and feed it to llm
+                const response = await axios.post('http://localhost:8082/getPrompts',{
+                    projectId : projectId
+                });
 
-            }
-          
-            }else{
-                // 1.fetch the chat history from  the db and stream it to the user l
-                
->>>>>>> 163fec9 (added pipeline to stream the llm response at frontend):apps/frontend/app/project/[...projectId]/page.tsx
+                const latestPrompt = response.data[response.data.length - 1]?.prompt;
+                console.log(latestPrompt);
+
+                if(latestPrompt !== undefined && latestPrompt !== null && latestPrompt !== ""){
+                    // request to llm ;
+                    console.log(latestPrompt);
+                    const llmResponse = await axios.post('http://localhost:3002/prompt',{
+                        prompt : latestPrompt,
+                        projectId : projectId
+                    });
+
+                    console.log(llmResponse.data)
+                }
             }
         } catch (error) {
             console.error(error)   

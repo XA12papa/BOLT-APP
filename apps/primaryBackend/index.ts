@@ -1,13 +1,9 @@
 import {prismaClient} from "db/client";
-<<<<<<< HEAD
 import express, { type Request, type Response, type NextFunction } from "express";
-=======
-import express, { response } from "express";
->>>>>>> 163fec9 (added pipeline to stream the llm response at frontend)
 import { middleware } from "./middleware";
 import cors from "cors";
 import dotenv from "dotenv";
-import {ApiError, ApiResponse, asyncHandler} from "helper"
+import {ApiError, ApiResponse, asyncHandler} from "helper/main"
 
 dotenv.config({
     path: "./.env"
@@ -18,7 +14,7 @@ app.use(express.json());
 app.use(cors());
 
 
-app.get("/projects",middleware, asyncHandler( async (req :Request,res :Response ,next :NextFunction) =>{
+app.get("/projects",middleware,asyncHandler( async (req :Request,res :Response ,next :NextFunction) =>{
     try {
         const response = await prismaClient.project.findMany();
         res.status(200).json(response);
@@ -53,13 +49,10 @@ app.post("/project",middleware,asyncHandler ( async (req, res) => {
             }
         })
 
-<<<<<<< HEAD
         if (!response?.id){
             res.status(500).json(new ApiResponse(500,response,"Error while creating project"))
         }
-=======
 
->>>>>>> 163fec9 (added pipeline to stream the llm response at frontend)
 
 
         res.status(200).json(new ApiResponse(200,response,"Project created successfull"));
@@ -68,9 +61,7 @@ app.post("/project",middleware,asyncHandler ( async (req, res) => {
     }
 }));
 
-<<<<<<< HEAD
-app.post("/getPrompts",asyncHandler( async (req,res) =>{
-=======
+
 app.post("/storePrompt",middleware,async (req , res)=>{
     const {prompt,projectId,type} = req.body;
     
@@ -92,7 +83,6 @@ app.post("/storePrompt",middleware,async (req , res)=>{
 })
 
 app.post("/getPrompts",middleware,async (req,res) =>{
->>>>>>> 163fec9 (added pipeline to stream the llm response at frontend)
     try {
         const {projectId} =  req.body;
 
@@ -115,9 +105,8 @@ app.post("/getPrompts",middleware,async (req,res) =>{
     } catch (error) {
         console.error(error)
     }
-}));
+});
 
-<<<<<<< HEAD
 app.post("/createPrompte",middleware,asyncHandler( async (req, res)=>{
     try {
         const  {prompt,projectId,role} = req.body;
@@ -141,8 +130,6 @@ app.post("/createPrompte",middleware,asyncHandler( async (req, res)=>{
         throw new ApiError(500,"Error while creating prompt ",error)
     }
 }));
-=======
->>>>>>> 163fec9 (added pipeline to stream the llm response at frontend)
 
 app.post("/",middleware,(req, res) => {
     res.send("Hello World!");

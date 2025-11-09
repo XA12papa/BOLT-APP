@@ -3,8 +3,8 @@ import { systemPrompt } from "./systemPrompt";
 import { prismaClient } from "db/client";
 
 
-import { ApiError, ApiResponse, asyncHandler } from "helper";
-import express, { text } from "express";
+import { ApiError, ApiResponse, asyncHandler } from "helper/main";
+import express, { type Request, type Response } from "express";
 import cors from "cors";
 import { ArtifactProcessor, type phrase_response } from "./phraser";
 import { onShellCommand , onFileUpdate } from "./os";
@@ -14,28 +14,24 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-const WS_URL =   "ws://localhost:8083";
-const ws_client = new WebSocket(WS_URL)
+const WS_URL = "ws://localhost:8083";
+const ws_client = new WebSocket(WS_URL);
 
-<<<<<<< HEAD
-app.post('/prompt',asyncHandler( async (req,res)=>{
-=======
+ws_client.on('open', () => {
+    ws_client.send("worker is connected to ws server ");
+});
 
-ws_client.on('open',() =>{
-    ws_client.send("worker is connected to ws server ")
-})
+ws_client.on('message', (message) => {
+    console.log(message.toString());
+});
 
-ws_client.on('message',(message)=>{
-    console.log(message.toString())
-})
-
-app.get("/server_health",(next)=>{
+app.get("/server_health", (req: Request, res: Response) => {
     console.log("server working");
-    ws_client.send("server is connected ")
-    return;
-})
-app.post('/prompt',async (req,res)=>{
->>>>>>> 163fec9 (added pipeline to stream the llm response at frontend)
+    ws_client.send("server is connected ");
+    res.status(200).json(new ApiResponse(200, null, "Server is healthy"));
+});
+
+app.post('/prompt', asyncHandler(async (req: Request, res: Response) => {
     // 1 . Take projectId and prompt from user 
     // 2. fetch project from the prisma client
     // 3. pull all the history of chats from the prisma client
@@ -50,7 +46,8 @@ app.post('/prompt',async (req,res)=>{
         }
     })
     if(!project){
-        res.status(404).json(new ApiResponse(404,null,"Project not found"));
+        res.status(404).json(new ApiResponse(404, null, "Project not found"));
+        return;
     }
 
     console.log(project)
@@ -135,13 +132,12 @@ app.post('/prompt',async (req,res)=>{
     });
     console.log("final response ", finalMessage)
     if(!finalMessage){
-        res.status(400).json(new ApiResponse(400,finalMessage,"something went wrong while generating llm response"));
+        res.status(400).json(new ApiResponse(400, finalMessage, "something went wrong while generating llm response"));
+        return;
     }
 
-    res.status(200).json(new ApiResponse(200 , finalMessage ,"successfully generated the llm respiosne "));
-
-    
-}))
+    res.status(200).json(new ApiResponse(200, finalMessage, "successfully generated the llm response"));
+}));
 
 app.listen(3002,()=>{
     console.log("App is running on the port 3002 !! ", )
