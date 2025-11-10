@@ -161,13 +161,13 @@ importers:
         specifier: ^2.8.5
         version: 2.8.5
       db:
-        specifier: workspace:*
+        specifier: workspace:db
         version: link:../../packages/db
       express:
         specifier: ^5.1.0
         version: 5.1.0
       helper:
-        specifier: workspace:*
+        specifier: workspace:helper
         version: link:../../packages/helper
       openai:
         specifier: ^5.12.2
