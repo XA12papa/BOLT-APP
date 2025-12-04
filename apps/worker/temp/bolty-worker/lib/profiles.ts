@@ -1,69 +1,42 @@
-    export type Profile = {
-      id: string;
-      name: string;
-      age: number;
-      bio: string;
-      image: string;
-    };
+import type { Profile } from "../types";
 
-    const profiles: Profile[] = [
-      {
-        id: "1",
-        name: "Ava",
-        age: 24,
-        bio: "Loves hiking, coffee shops and weekend getaways.",
-        image: "https://randomuser.me/api/portraits/women/65.jpg",
-      },
-      {
-        id: "2",
-        name: "Noah",
-        age: 27,
-        bio: "Tech enthusiast, amateur chef, and vinyl collector.",
-        image: "https://randomuser.me/api/portraits/men/32.jpg",
-      },
-      {
-        id: "3",
-        name: "Olivia",
-        age: 22,
-        bio: "Artist — museums, late-night pizza and small galleries.",
-        image: "https://randomuser.me/api/portraits/women/44.jpg",
-      },
-      {
-        id: "4",
-        name: "Liam",
-        age: 29,
-        bio: "Traveler and amateur photographer. Ask me about my last trip.",
-        image: "https://randomuser.me/api/portraits/men/76.jpg",
-      },
-      {
-        id: "5",
-        name: "Emma",
-        age: 26,
-        bio: "Yoga, reading, and big plant lover.",
-        image: "https://randomuser.me/api/portraits/women/12.jpg",
-      },
-      {
-        id: "6",
-        name: "Mason",
-        age: 30,
-        bio: "Coffee roaster and software engineer. Let's grab a latte.",
-        image: "https://randomuser.me/api/portraits/men/66.jpg",
-      },
-      {
-        id: "7",
-        name: "Sophia",
-        age: 23,
-        bio: "Student, climber and documentary enthusiast.",
-        image: "https://randomuser.me/api/portraits/women/56.jpg",
-      },
-      {
-        id: "8",
-        name: "Lucas",
-        age: 28,
-        bio: "Guitarist — always on the road for shows and coffee.",
-        image: "https://randomuser.me/api/portraits/men/92.jpg",
-      }
-    ];
+const NAMES = [
+  "Alex",
+  "Sam",
+  "Taylor",
+  "Jordan",
+  "Casey",
+  "Jamie",
+  "Morgan",
+  "Riley",
+  "Cameron",
+  "Drew",
+  "Quinn",
+  "Avery",
+  "Parker",
+  "Rowan",
+];
 
-    export default profiles;
-  
+const BIOS = [
+  "Love hiking and coffee.",
+  "Software engineer who loves dogs.",
+  "Artist and music fan.",
+  "Traveler, foodie, and yogi.",
+  "Netflix and chill enthusiast.",
+  "Gym rat and weekend cook.",
+  "Bookworm and plant parent.",
+];
+
+export function getSampleProfiles(count = 10): Profile[] {
+  const profiles: Profile[] = [];
+  for (let i = 0; i < count; i++) {
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+    const name = NAMES[Math.floor(Math.random() * NAMES.length)];
+    const age = 20 + Math.floor(Math.random() * 15);
+    const avatarId = Math.floor(Math.random() * 70) + 1;
+    const avatar = `https://i.pravatar.cc/500?img=${avatarId}`;
+    const bio = BIOS[Math.floor(Math.random() * BIOS.length)];
+    profiles.push({ id, name, age, bio, avatar });
+  }
+  return profiles;
+}

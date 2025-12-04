@@ -9,6 +9,7 @@ import {
 import { Button } from "./ui/button"
 import axios from 'axios'
 import { Trash2 } from 'lucide-react';
+import { useAuth } from '@clerk/nextjs'
 
 
 interface projects{
@@ -23,7 +24,7 @@ function Sidesbar() {
     const [position,setMousePosition] = React.useState({x:0,y:0});
 
     const [projects,setProjects] = React.useState<projects[] | []>([])
-
+    const {getToken} = useAuth()
 
 
     async function handeleDeleteProject(){
@@ -55,8 +56,13 @@ function Sidesbar() {
     React.useEffect(() => {
         async function getProjects(){
             try {
-                const response = await axios.get("http://localhost:8082/projects");
-                console.log(response);
+                const token = await getToken();
+
+                const response = await axios.get("http://localhost:8082/projects",{
+                    headers :{
+                        "authorization" : `Bearer ${token}  `
+                    }
+                });
                 setProjects(response.data);
             } catch (error) {
                 console.error(error);   

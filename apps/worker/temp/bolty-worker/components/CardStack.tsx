@@ -1,107 +1,62 @@
-    "use client";
+"use client";
 
-    import React, { useEffect, useState } from "react";
-    import Card from "./Card";
-    import MatchModal from "./MatchModal";
-    import MatchesPanel from "./MatchesPanel";
-    import type { Profile } from "../lib/types";
+import React, { useEffect, useState } from "react";
+import Card from "./Card";
+import type { Profile } from "../types";
+import { getSampleProfiles } from "../lib/profiles";
+import { loadLikedProfiles, saveLikedProfiles } from "../lib/storage";
 
-    export default function CardStack() {
-      const [profiles, setProfiles] = useState<Profile[]>([]);
-      const [matches, setMatches] = useState<Profile[]>([]);
-      const [showMatches, setShowMatches] = useState(false);
-      const [currentMatch, setCurrentMatch] = useState<Profile | null>(null);
+export default function CardStack() {
+  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [liked, setLiked] = useState<Profile[]>([]);
 
-      useEffect(() => {
-        let mounted = true;
-        async function load() {
-          try {
-            const res = await fetch("/api/profiles");
-            const data = await res.json();
-            if (mounted) setProfiles(data);
-          } catch (err) {
-            console.error(err);
-          }
-        }
-        load();
-        try {
-          const saved = localStorage.getItem("tinder_matches");
-          if (saved) setMatches(JSON.parse(saved));
-        } catch {
-          //
-        }
-        return () => {
-          mounted = false;
-        };
-      }, []);
+  useEffect(() => {
+    setProfiles(getSampleProfiles(8));
+    setLiked(loadLikedProfiles());
+  }, []);
 
-      useEffect(() => {
-        try {
-          localStorage.setItem("tinder_matches", JSON.stringify(matches));
-        } catch {
-          //
-        }
-      }, [matches]);
+  const handleSwipe = (id: string, dir: "left" | "right") => {
+    setProfiles((prev) => {
+      const swiped = prev.find((p) => p.id === id);
+      const rest = prev.filter((p) => p.id !== id);
+      if (dir === "right" && swiped) {
+        setLiked((prevLikes) => {
+          const next = [...prevLikes, swiped];
+          saveLikedProfiles(next);
+          return next;
+        });
+      }
+      if (rest.length <= 3) {
+        setTimeout(() => {
+          setProfiles((cur) => [...cur, ...getSampleProfiles(5)]);
+        }, 400);
+      }
+      return rest;
+    });
+  };
 
-      const handleSwipe = (dir: "left" | "right", profile: Profile) => {
-        setProfiles((prev) => prev.filter((p) => p.id !== profile.id));
+  return (
+    <div className="flex flex-col items-center">
+      <div className="card-stack">
+        {profiles
+          .slice(0, 5)
+          .reverse()
+          .map((profile, index) => {
+            const isTop = index === 0;
+            return (
+              <Card
+                key={profile.id}
+                profile={profile}
+                onSwipe={handleSwipe}
+                isTop={isTop}
+              />
+            );
+          })}
+      </div>
 
-        if (dir === "right") {
-          // simulate other person liking back ~35% chance
-          const matched = Math.random() < 0.35;
-          if (matched) {
-            setMatches((m) => [profile, ...m]);
-            setCurrentMatch(profile);
-          }
-        }
-      };
-
-      const topProfiles = profiles.slice(0, 3);
-
-      return (
-        <>
-          <div className="header">
-            <div className="app-title">Tinder Clone</div>
-            <div className="controls">
-              <button className="btn" onClick={() => setShowMatches((s) => !s)}>Matches ({matches.length})</button>
-            </div>
-          </div>
-
-          <div className="card-stack" aria-live="polite">
-            {topProfiles.length === 0 && <div style={{ textAlign: "center", padding: 20 }}>No more profiles</div>}
-            {topProfiles.map((p, i) => (
-              <Card key={p.id} profile={p} index={i} onSwipe={handleSwipe} />
-            ))}
-          </div>
-
-          <div className="controls" style={{ marginTop: 20, justifyContent: "center" }}>
-            <button
-              className="btn btn--dislike"
-              onClick={() => {
-                const top = profiles[0];
-                if (!top) return;
-                handleSwipe("left", top);
-              }}
-              aria-label="Dislike"
-            >
-              ✖
-            </button>
-
-            <button
-              className="btn btn--like"
-              onClick={() => {
-                const top = profiles[0];
-                if (!top) return;
-                handleSwipe("right", top);
-              }}
-              aria-label="Like"
-            >
-              ❤
-            </button>
-          </div>
-
-          {currentMatch && <MatchModal profile={currentMatch} onClose={() => setCurrentMatch(null)} />}
-          {showMatches && <MatchesPanel matches={matches} onClose={() => setShowMatches(false)} />}
-        </>
-      );
-    }
+      <div className="mt-6">
+        <p className="text-sm text-gray-500">Swipe right to like, left to pass</p>
+      </div>
+    </div>
+  );
+}

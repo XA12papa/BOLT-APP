@@ -1,5 +1,7 @@
 import type { NextFunction,Request,Response } from "express";
 import jwt from "jsonwebtoken";
+
+
 export function middleware(req :Request,res : Response, next :NextFunction) {
     try {
         const token = req.headers.authorization?.split(" ")[1];

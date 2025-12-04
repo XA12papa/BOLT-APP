@@ -101,7 +101,7 @@ app.post('/prompt', asyncHandler(async (req: Request, res: Response) => {
         store : false,
         stream : true,
         // max_output_tokens : 8000,
-    });
+    }); 
 
 
     for await (const chunk of response) {
@@ -112,7 +112,7 @@ app.post('/prompt', asyncHandler(async (req: Request, res: Response) => {
             const PHRASE : phrase_response | null = await artifactProcessor.parse();
             console.log("Phrase",PHRASE);
             if(PHRASE !== null){
-                ws_client.send(JSON.stringify(PHRASE))
+                ws_client.send(JSON.stringify({...PHRASE}))
             }
 
             artifact += chunk.delta;

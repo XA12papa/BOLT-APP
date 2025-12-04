@@ -1,128 +1,87 @@
-    @import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-    :root {
-      --background: #ffffff;
-      --foreground: #171717;
-    }
+:root {
+  --card-width: 360px;
+  --card-height: 540px;
+}
 
-    @theme inline {
-      --color-background: var(--background);
-      --color-foreground: var(--foreground);
-      --font-sans: var(--font-geist-sans);
-      --font-mono: var(--font-geist-mono);
-    }
+html,
+body,
+#__next {
+  height: 100%;
+}
 
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --background: #0a0a0a;
-        --foreground: #ededed;
-      }
-    }
+body {
+  @apply bg-gradient-to-br from-pink-50 via-white to-white text-gray-900;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial;
+}
 
-    body {
-      background: var(--background);
-      color: var(--foreground);
-      font-family: Arial, Helvetica, sans-serif;
-      margin: 0;
-      padding: 0;
-    }
+/* Utilities for pointer dragging / selection */
+.no-select {
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  touch-action: none;
+}
 
-    .page {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      box-sizing: border-box;
-    }
+/* Card base (absolute positioned; centered via utility classes) */
+.card {
+  width: var(--card-width);
+  height: var(--card-height);
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+  background: white;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
 
-    .main {
-      max-width: 420px;
-      width: 100%;
-      background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(250,250,250,1));
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-    }
+/* Ensure images cover the card */
+.card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
 
-    h1 {
-      margin: 0 0 12px 0;
-      font-size: 20px;
-      text-align: center;
-    }
+/* Like / Nope badges */
+.badge {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-weight: 700;
+  color: white;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  transform: rotate(-15deg);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
 
-    /* Calculator styles */
-    .calculator {
-      display: grid;
-      grid-template-rows: auto 1fr;
-      gap: 12px;
-    }
+.badge.nope {
+  left: auto;
+  right: 20px;
+  background: rgba(239, 68, 68, 0.95);
+  transform: rotate(15deg);
+}
 
-    .display {
-      background: #f7f7f7;
-      padding: 12px 16px;
-      border-radius: 8px;
-      font-size: 28px;
-      text-align: right;
-      box-shadow: inset 0 -1px 0 rgba(0,0,0,0.02);
-      min-height: 48px;
-      overflow-x: auto;
-      word-break: break-all;
-    }
+.badge.like {
+  background: rgba(34, 197, 94, 0.95);
+}
 
-    /* Buttons grid */
-    .buttons {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-    }
-
-    .button {
-      background: #fff;
-      border: 1px solid #e6e6e6;
-      padding: 14px;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: transform 0.08s ease, background 0.08s ease;
-      user-select: none;
-    }
-
-    .button:active {
-      transform: translateY(1px);
-    }
-
-    .button.operator {
-      background: linear-gradient(180deg,#ffd27a,#ffb84d);
-      color: #000;
-      font-weight: 600;
-    }
-
-    .button.clear {
-      background: #ffe6e6;
-      border-color: #ffcfcf;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      .main {
-        background: linear-gradient(180deg, rgba(10,10,10,0.95), rgba(20,20,20,1));
-        box-shadow: none;
-      }
-      .display {
-        background: #111;
-        color: #fff;
-      }
-      .button {
-        background: #0d0d0d;
-        border-color: #222;
-        color: #eaeaeb;
-      }
-      .button.operator {
-        background: linear-gradient(180deg,#444,#666);
-        color: #fff;
-      }
-      .button.clear {
-        background: #3b0000;
-        color: #fff;
-      }
-    }
+/* Footer button style */
+.footer-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}

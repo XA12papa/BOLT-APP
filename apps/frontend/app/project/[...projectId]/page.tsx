@@ -13,11 +13,9 @@ import { cn } from "@/lib/utils";
 import { Eye, Code } from "lucide-react";
 import axios from "axios";
 import { useAuth } from "@clerk/clerk-react";
-
+import { CodeBlock } from "@/components/ui/code-block";
 
 import { streamLLMResponse } from "@/lib/streamLLMResponse"
-import SyntaxHighlighter, { Prism } from "react-syntax-highlighter"
-import { dark } from "react-syntax-highlighter/dist/esm/styles/hljs"
 
 
 enum TabKey {
@@ -28,28 +26,70 @@ interface llm_response_type{
     data : string,
     type : 'CODE' | 'COMMAND' |'NONE',
     filepath ?: string,
+    role : "USER" | "SYSTEM"
  }
 
 
 export default function Chat(){
     const params = useParams<{projectId: string[]}>();
     const projectId = params.projectId;
-    const [prompt, setPrompt] = React.useState<string>("");
     const [tabState, changetabState] = React.useState<TabKey>(TabKey.Code);
     const {getToken} = useAuth();
 
     // pre llm request code 
 
-    async function RequestToLLM()
+
+
+    async function RequestToLLM()   
     {
         try {
             // fetch history of chats
+            // show it to the user 
             // if init == TRUE start a new conversation with the LLM 
+            
             let reloadCount = parseInt(sessionStorage.getItem('reloadCount') || '0', 10);
+            const  token = await getToken();
+
+
 
             if(projectId !== undefined && Array.isArray(projectId)){
-                console.log(projectId);
-                if(projectId[1] === 'TRUE' && reloadCount){
+
+
+
+                console.log(projectId[0]);
+                console.log(reloadCount);
+
+
+                const response = await axios.post('http://localhost:8082/getPrompts',{
+                    projectId : projectId[0]
+                },{headers: {Authorization: `Bearer ${token}`}});
+
+                const data = response?.data?.data;
+                console.log(data);
+                if(data !== undefined && data  !== null ){
+                    const lenght = data?.length;
+                    for(let i = 0; i < lenght; i++){
+                        console.log(data[i]);
+                        set_llm_response((prev) => [...prev, {...data[i], data: data[i].prompt,role:data[i].role}]);
+                    }
+                }
+                const latestPrompt = response?.data[response?.data?.length - 1]?.prompt;
+                
+                if(latestPrompt !== undefined && latestPrompt !== null && latestPrompt !== ""){
+                    // request to llm ;
+                    // console.log(latestPrompt);
+                    const llmResponse = await axios.post('http://localhost:3002/prompt',{
+                        prompt : latestPrompt,
+                        projectId : projectId
+                    });
+    
+                    console.log(llmResponse.data)
+
+
+                }
+                
+
+                if(projectId[1] === 'TRUE' && reloadCount <1){
                     // 1.using project If fetch the prompts of use 
                     // 2. give llm some prompt 
                     // 3. fetch the response from llm and stream it the  usr
@@ -63,30 +103,14 @@ export default function Chat(){
                     }
 
                     const current_prompt = prompts?.data[0]?.prompt;
-
+                    console.log(current_prompt);
                     // send llm this prompt to process 
                 }
             } else {
                 // 1.fetch the chat history from  the db and stream it to the user
                 // 1. fetch the prompt history of the user 
                 // 2.extract the latest user prompt and feed it to llm
-                const response = await axios.post('http://localhost:8082/getPrompts',{
-                    projectId : projectId
-                });
-
-                const latestPrompt = response.data[response.data.length - 1]?.prompt;
-                console.log(latestPrompt);
-
-                if(latestPrompt !== undefined && latestPrompt !== null && latestPrompt !== ""){
-                    // request to llm ;
-                    console.log(latestPrompt);
-                    const llmResponse = await axios.post('http://localhost:3002/prompt',{
-                        prompt : latestPrompt,
-                        projectId : projectId
-                    });
-
-                    console.log(llmResponse.data)
-                }
+               
             }
         } catch (error) {
             console.error(error)   
@@ -104,7 +128,7 @@ export default function Chat(){
     // pre llm request code 
 
 
-    // post llm process
+    // post llm process 
 
 
    const [llm_response, set_llm_response ] = React.useState<llm_response_type[] | []>([]);
@@ -126,7 +150,7 @@ export default function Chat(){
     let artifact = '';
 
     // Add new response item
-    set_llm_response((prev) => [...prev, {...json_format, data: ''}]);
+    set_llm_response((prev) => [...prev, {...json_format, data: '',role:"SYSTEM"}]);
     
     // Stream the data chunk by chunk
     for await (const chunk of streamLLMResponse(json_format.data, 50)) {
@@ -242,33 +266,21 @@ export default function Chat(){
                     </div>
 
 
-                    <div className="llm-response  p-4 w-full text-gray-500 rounded-md grow top-0 overflow-y-scroll no-scrollbar">
+                    <div className="llm-response flex flex-col gap-4  p-4 w-full text-gray-500 rounded-md grow top-0 overflow-y-scroll no-scrollbar">
                         {
                              llm_response.map((val, index) =>{
                                 if(val.type === 'NONE') return;
                                 return(
-                                   
-                                   <div className="flex flex-col gap-2" key={index}>
-                                   {/* <p>{val?.type}</p> */}
-                                      {val?.filepath?(
-                                            
-                                         <SyntaxHighlighter language="javascript" style={dark}>
-                                                  {val?.filepath}
-                                         </SyntaxHighlighter>
-                 
-                                         ):''}
-                 
-                                         { }
-                                         { }
-                                         
-                                         {/* <p  className="whitespace-pre-wrap" >{val?.data}</p> */}
-                 
-                                         <SyntaxHighlighter language="javascript" style={dark} >
-                                                {val?.data}
-                                         </SyntaxHighlighter>
-                    
-                 
-                                   </div>
+                                        <>
+                                        <div>role : {val?.role}</div>
+                                        <CodeBlock    
+                                            language="tsx"
+                                            filename={(!val?.filepath)?'COMMAND':val?.filepath}
+                                            highlightLines={[9, 13, 14, 18]}
+                                            code={val?.data}
+                                        />
+                                        </>
+ 
                                 )
                              })
                         }
@@ -300,7 +312,7 @@ export default function Chat(){
                                             focus-visible:ring-0 
 
                                             ' >
-
+                                                    
                                             </Textarea>
                                                     <BorderBeam
                                                 duration={6}
