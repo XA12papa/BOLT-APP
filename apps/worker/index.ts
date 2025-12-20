@@ -112,6 +112,18 @@ app.post('/prompt', asyncHandler(async (req: Request, res: Response) => {
             const PHRASE : phrase_response | null = await artifactProcessor.parse();
             console.log("Phrase",PHRASE);
             if(PHRASE !== null){
+                try {
+                        await prismaClient.prompt.create({
+                            data :{
+                                prompt : PHRASE.data,
+                                projectId,
+                                role : "SYSTEM",
+                                filepath : PHRASE?.filepath ?? null
+                            }
+                        })
+                } catch (e :any) {
+                    console.error(e);
+                }
                 ws_client.send(JSON.stringify({...PHRASE}))
             }
 
@@ -123,20 +135,16 @@ app.post('/prompt', asyncHandler(async (req: Request, res: Response) => {
 
     //  store response from the llm to database attachig the prompt 
 
-    const finalMessage  =  await prismaClient.prompt.create({
-        data :{
-            prompt : artifact,
-            projectId,
-            role : "SYSTEM"
-        }
-    });
-    console.log("final response ", finalMessage)
-    if(!finalMessage){
-        res.status(400).json(new ApiResponse(400, finalMessage, "something went wrong while generating llm response"));
-        return;
-    }
+    // const finalMessage  =  await prismaClient.prompt.create({
+    //     data :{
+    //         prompt : artifact,
+    //         projectId,
+    //         role : "SYSTEM"
+    //     }
+    // });
 
-    res.status(200).json(new ApiResponse(200, finalMessage, "successfully generated the llm response"));
+
+    res.status(200).json(new ApiResponse(200, "successfully generated the llm response"));
 }));
 
 app.listen(3002,()=>{

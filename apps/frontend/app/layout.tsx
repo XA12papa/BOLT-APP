@@ -1,16 +1,8 @@
 
 import { Roboto } from "next/font/google";
 import "./globals.css";
+import { ClerkProvider } from '@clerk/nextjs'
 
-import {
-  ClerkProvider,
-  SignInButton,
-  SignUpButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-
-} from '@clerk/nextjs'
 import Sidesbar from "@/components/Sidesbar";
 
 
@@ -22,20 +14,18 @@ const roboto = Roboto({
   display: "swap",
 });
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={roboto.variable}>
     <ClerkProvider >
-      <body>
-        <Sidesbar/>
-        {children}
-      </body>
+        <html lang="en" className={roboto.variable}>
+          <body>
+            <Sidesbar/>
+              {children}
+
+          </body>
+
+        </html>
     </ClerkProvider>
 
-    </html>
   );
 }

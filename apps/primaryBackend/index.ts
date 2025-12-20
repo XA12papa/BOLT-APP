@@ -75,7 +75,9 @@ app.post("/storePrompt",middleware,async (req , res)=>{
                 }  
               })
 
-              res.status(500).json(response)
+              res.status(200).json(new ApiResponse(200,response,"successfully stored  the prompt"));
+
+              
         } catch (error) {
             console.error("error while creating project",error);
             res.status(500).json({ error: "Internal server error" });
@@ -92,7 +94,7 @@ app.post("/getPrompts",middleware,async (req,res) =>{
                     projectId : projectId
                 },
                 orderBy: {
-                    createdAt: 'asc'
+                    createdAt: 'asc'    
                 }
             }
         );
@@ -110,12 +112,14 @@ app.post("/getPrompts",middleware,async (req,res) =>{
 app.post("/createPrompte",middleware,asyncHandler( async (req, res)=>{
     try {
         const  {prompt,projectId,role} = req.body;
+
+        console.log(prompt,projectId,role);
         const response  = await prismaClient.prompt.create(
             {
                 data :{
                     prompt,
-                    projectId,
-                    role
+                    projectId : projectId as string,
+                    role    
                 }
             }
         )
@@ -125,8 +129,10 @@ app.post("/createPrompte",middleware,asyncHandler( async (req, res)=>{
             return;
         }
 
-        res.send(200).json(new ApiResponse(200,response,"Prompt created sucessfully"))
+        
+        res.send(200).json({data: response, status : 200 , message : "prompt successfully stored in db"});
     } catch (error) {
+        console.log(error);
         throw new ApiError(500,"Error while creating prompt ",error)
     }
 }));

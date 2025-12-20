@@ -1,4 +1,4 @@
-'use client'
+"use client"
 import React, { useEffect } from "react";
 import {
     ResizableHandle,
@@ -12,10 +12,14 @@ import { BorderBeam } from "@/components/ui/border-beam";
 import { cn } from "@/lib/utils";
 import { Eye, Code } from "lucide-react";
 import axios from "axios";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth } from "@clerk/nextjs";
 import { CodeBlock } from "@/components/ui/code-block";
-
 import { streamLLMResponse } from "@/lib/streamLLMResponse"
+
+import { ArrowBigRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+import TitleBar from "@/components/TitleBar";
 
 
 enum TabKey {
@@ -23,8 +27,7 @@ enum TabKey {
     Preview = 'PREVIEW',
 }
 interface llm_response_type{
-    data : string,
-    type : 'CODE' | 'COMMAND' |'NONE',
+    prompt : string,
     filepath ?: string,
     role : "USER" | "SYSTEM"
  }
@@ -35,6 +38,8 @@ export default function Chat(){
     const projectId = params.projectId;
     const [tabState, changetabState] = React.useState<TabKey>(TabKey.Code);
     const {getToken} = useAuth();
+
+    const [text,ChangeText] = React.useState("");
 
     // pre llm request code 
 
@@ -59,39 +64,41 @@ export default function Chat(){
                 console.log(projectId[0]);
                 console.log(reloadCount);
 
-
+                // get the latest prompt from the database
                 const response = await axios.post('http://localhost:8082/getPrompts',{
                     projectId : projectId[0]
                 },{headers: {Authorization: `Bearer ${token}`}});
 
-                const data = response?.data?.data;
-                console.log(data);
-                if(data !== undefined && data  !== null ){
-                    const lenght = data?.length;
+                const RESPONSE_DATA : llm_response_type[] | null = response?.data?.data ?? null;
+
+                if(RESPONSE_DATA !== undefined && RESPONSE_DATA  !== null ){
+                    
+                    const lenght = RESPONSE_DATA?.length;
+
                     for(let i = 0; i < lenght; i++){
-                        console.log(data[i]);
-                        set_llm_response((prev) => [...prev, {...data[i], data: data[i].prompt,role:data[i].role}]);
+                        set_llm_response((prev) => [...prev, {...RESPONSE_DATA[i], prompt: RESPONSE_DATA[i].prompt ?? '',role:RESPONSE_DATA[i].role}]);
                     }
                 }
-                const latestPrompt = response?.data[response?.data?.length - 1]?.prompt;
-                
-                if(latestPrompt !== undefined && latestPrompt !== null && latestPrompt !== ""){
+
+                const latestConversation : llm_response_type | null = response?.data[response?.data?.length - 1] ?? null;
+                console.log(latestConversation);
+                if(latestConversation !== undefined && latestConversation !== null ){
                     // request to llm ;
                     // console.log(latestPrompt);
-                    const llmResponse = await axios.post('http://localhost:3002/prompt',{
-                        prompt : latestPrompt,
-                        projectId : projectId
-                    });
-    
-                    console.log(llmResponse.data)
-
+                    if(latestConversation?.role === 'USER'){
+                        const llmResponse = await axios.post('http://localhost:3002/prompt',{
+                            prompt : latestConversation?.prompt ?? '',
+                            projectId : projectId
+                        });
+        
+                        console.log(llmResponse.data)
+                    }
 
                 }
                 
 
                 if(projectId[1] === 'TRUE' && reloadCount <1){
-                    // 1.using project If fetch the prompts of use 
-                    // 2. give llm some prompt 
+                    // 1.using project If fetch the prompts of use
                     // 3. fetch the response from llm and stream it the  usr
 
                     const token = await getToken()
@@ -150,7 +157,7 @@ export default function Chat(){
     let artifact = '';
 
     // Add new response item
-    set_llm_response((prev) => [...prev, {...json_format, data: '',role:"SYSTEM"}]);
+    set_llm_response((prev) => [...prev, {...json_format, prompt: '',role:"SYSTEM"}]);
     
     // Stream the data chunk by chunk
     for await (const chunk of streamLLMResponse(json_format.data, 50)) {
@@ -162,7 +169,7 @@ export default function Chat(){
           if (prev.length === 0) return prev;
           const previous = prev.slice(0, -1);
           const lastItem = prev[prev.length - 1];
-          return [...previous, {...lastItem, data: artifact}];
+          return [...previous, {...lastItem, prompt: artifact }];
        });
     }
  }, []);
@@ -253,6 +260,47 @@ export default function Chat(){
      },[])
 
 
+
+     async function sendRequestTollm() {
+        // 1. store the prompt to the db 
+        // 2. set it to the llm_response state
+        // 3. send the prompt to the worker 
+
+        try {
+            if(text === "") return ;
+            const token = await getToken();
+            if(!token) return
+
+            const prompt = text;
+            ChangeText("");
+
+            let response = await axios.post("http://localhost:8082/createPrompte",{
+                prompt ,
+                projectId:projectId[0].toString(),
+                role : "USER"
+            },{headers: {Authorization: `Bearer ${token}`}}) ;
+
+            const data = JSON.parse(response.config.data );
+
+
+            if(!data || !data?.prompt   ) return ;
+            set_llm_response((prev)=> [...prev,{prompt:data?.prompt ?? "", role :"USER",}]);
+
+            await axios.post("http://localhost:3002/prompt",{
+                prompt : data?.prompt,
+                projectId : data?.projectId
+            });
+
+
+        } catch (error) {
+            // give a toast message for error ; 
+            console.log("Error")
+            console.log(error);
+            
+        }
+
+     }
+     
     return (
         <div className="h-screen bg-[#101010] ">
 
@@ -260,16 +308,13 @@ export default function Chat(){
             <ResizablePanel className="relative"    >
                 <div className=" px-4 py-4 rounded-lg pl-10   absolute  bottom-0  right-2  w-full h-full  flex flex-col gap-4">
 
-                    <div className="tools w-full h-14 bg-red-500 rounded-sm">
-
-                            <h1>Tool bar </h1>
-                    </div>
+                    <TitleBar projectId={projectId[0]}/>
 
 
                     <div className="llm-response flex flex-col gap-4  p-4 w-full text-gray-500 rounded-md grow top-0 overflow-y-scroll no-scrollbar">
                         {
                              llm_response.map((val, index) =>{
-                                if(val.type === 'NONE') return;
+                                if(val.role === 'USER') return(<div>User: {val?.prompt}</div>);
                                 return(
                                         <>
                                         <div>role : {val?.role}</div>
@@ -277,7 +322,7 @@ export default function Chat(){
                                             language="tsx"
                                             filename={(!val?.filepath)?'COMMAND':val?.filepath}
                                             highlightLines={[9, 13, 14, 18]}
-                                            code={val?.data}
+                                            code={val?.prompt}
                                         />
                                         </>
  
@@ -289,7 +334,7 @@ export default function Chat(){
 
                     <div className="  bg-[#1e1e21] relative  rounded-lg  w-full" >
 
-                            <Textarea id='textArea' placeholder='Type your idea and we will build it together ' className='  
+                            <Textarea id='textArea' value={text} onChange={(e)=>{ChangeText(e.target.value)}} placeholder='Type your idea and we will build it together ' className='  
                                             placeholder:text-gray-400
                                             
                                             placeholder:text-[1rem]
@@ -320,14 +365,17 @@ export default function Chat(){
                                                 size={200}
                                                 borderWidth={3}
                                                 className="from-transparent absolute via-blue-500 to-transparent"
+
                                             />
 
 
-                                
+                                <div className="Tools absolute bottom-2 right-2">
+                                    <Button variant="ghost" className="rounded-full hover:bg-blue-500 " size="lg" onClick={sendRequestTollm}><ArrowBigRight  className="scale-125 " strokeWidth={0} fill="#FFFFFF"/></Button>
+                                </div>
 
                     </div>
                 </div>
-            </ResizablePanel>
+            </ResizablePanel>   
 
 
             <ResizableHandle  className="bg-gray-800 hover:bg-gray-400 transition-all ease-in-out duration"/>
@@ -382,4 +430,5 @@ export default function Chat(){
         </ResizablePanelGroup>
         </div>
     )
+    
 }

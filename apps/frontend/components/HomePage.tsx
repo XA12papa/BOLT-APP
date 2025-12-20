@@ -2,13 +2,14 @@
 import React from 'react'
 import { Textarea } from './ui/textarea'    
 import { Button } from './ui/button'
-import { useAuth } from '@clerk/nextjs';
 import axios from 'axios';
 import { BorderBeam } from './ui/border-beam';
 import { Vortex } from './ui/vortex';
 import { TypingAnimation } from './ui/typing-animation';
 import { useRouter } from 'next/navigation';
 import { Highlighter } from "./ui/highlighter";
+import { useAuth } from '@clerk/nextjs';
+
 
 function HomePage() {
   const {getToken} = useAuth();
@@ -98,6 +99,7 @@ function HomePage() {
         
                             </div>
                       <Button className=' w-full bg-blue-400 text-xl mt-2   font-roboto font-semibold hover:bg-blue-500 border-none p-0 border-white'  onClick={()=>{getValue()}}>SUBMIT</Button>
+                      
                 </div>
 
               </div>

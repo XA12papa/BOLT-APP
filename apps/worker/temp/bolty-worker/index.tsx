@@ -1,11 +1,4 @@
-    import Calculator from "./components/Calculator";
+import { registerRootComponent } from 'expo';
+import App from './App';
 
-    export default function Home() {
-      return (
-        <div className="min-h-screen flex items-center justify-center p-8">
-          <main className="w-full max-w-md">
-            <Calculator />
-          </main>
-        </div>
-      );
-    }
+registerRootComponent(App);
